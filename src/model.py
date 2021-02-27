@@ -7,7 +7,7 @@ import torch
 from torch import Tensor, nn
 
 
-from typing import Optional, List, Type, Union
+from typing import Optional, Type, Union
 
 
 class BasicBlock(nn.Module):
@@ -121,7 +121,7 @@ class ResNet(nn.Module):
             self,
             num_classes: int,
             block: Type[Union[BasicBlock, Bottleneck]],
-            layers: List[int, ...]
+            layers: list
     ) -> None:
         super().__init__()
         self.in_channels = 16
@@ -141,6 +141,8 @@ class ResNet(nn.Module):
 
         self.avg_pool = nn.AdaptiveAvgPool2d((1, 1))
         self.fc = nn.Linear(64 * block.expansion, num_classes)
+
+        self._init_params()
 
     def _make_layer(
             self,
@@ -168,6 +170,20 @@ class ResNet(nn.Module):
             layers.append(block(self.in_channels, out_channels))
 
         return nn.Sequential(*layers)
+
+    def _init_params(self):
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(
+                    tensor=m.weight,
+                    mode='fan_out',
+                    nonlinearity='relu'
+                )
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
+            elif isinstance(m, nn.BatchNorm2d):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
 
     def forward(self, x: Tensor) -> Tensor:
         out = self.conv1(x)
