@@ -8,5 +8,5 @@ LR = 1e-2
 MOMENTUM = 0.9
 WD = 1e-4
 BATCH_SIZE = 128
-THRESHOLD = 0.65
+COMP_RATE = 0.8
 OUTPUT_DIR = '../output'

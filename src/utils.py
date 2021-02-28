@@ -20,7 +20,6 @@ def train(
         criterion: nn.Module,
         optimizer: optim.Optimizer,
         num_epochs: int = 25,
-        threshold: float = 0.5,
 ) -> Tuple[nn.Module, list]:
     since = time.time()
     val_acc_history = list()
@@ -104,9 +103,9 @@ def train(
 
 
 def update_learn_rate(epoch: int, lr: float, optimizer: optim.Optimizer) -> None:
-    if epoch < 10:
+    if epoch <= 30:
         pass
-    elif epoch < 20:
+    elif epoch <= 60:
         lr *= 1e-1
     else:
         lr *= 1e-2
@@ -125,6 +124,3 @@ def compute_statistics(dataset: Dataset) -> Tuple[list, list]:
     std = np.std(data.numpy(), axis=(0, 2, 3))
 
     return mean, std
-
-
-

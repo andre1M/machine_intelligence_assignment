@@ -1,5 +1,6 @@
-from global_vars import DEVICE, EPOCHS, LR, BATCH_SIZE, THRESHOLD, SEED, MOMENTUM, WD
+from global_vars import DEVICE, EPOCHS, LR, BATCH_SIZE, SEED, MOMENTUM, WD, COMP_RATE
 from utils import compute_statistics, train
+from pruning import prune
 from model import resnet20
 
 from torch.utils.data import DataLoader
@@ -30,7 +31,7 @@ train_transform = transforms.Compose([
 test_transform = transforms.Compose([
     transforms.Resize(32),
     transforms.ToTensor(),
-    # transforms.Normalize(mean=mean, std=std)
+    transforms.Normalize(mean=mean, std=std)
 ])
 
 # define dataset
@@ -54,6 +55,7 @@ dataloaders = dict(train=trainloader, val=testloader)
 
 # initialize model
 model = resnet20(10)
+model.load_state_dict(torch.load('../output/primary_train/resnet20.pth'))
 
 print('Device:', DEVICE)
 model = model.to(DEVICE)
@@ -73,5 +75,17 @@ model, hist = train(
     criterion=criterion,
     optimizer=optimizer,
     num_epochs=EPOCHS,
-    threshold=THRESHOLD
 )
+
+# # prune
+# layers = ['layer1', 'layer2', 'layer3']
+# model = prune(
+#     model=model,
+#     dataloaders=dataloaders,
+#     criterion=criterion,
+#     optimizer=optimizer,
+#     comp_rate=COMP_RATE,
+#     layers=layers,
+#     tune_epochs=2,
+#     inplace=True
+# )
